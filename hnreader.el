@@ -1,9 +1,9 @@
+;;; hnreader.el --- A HN reader -*- lexical-binding: t; -*-
 (require 'promise)
 (require 'request)
 (require 'shr)
 (require 'dom)
 (require 'cl-lib)
-
 
 (defvar hn--buffer "*HN*"
   "Buffer for HN pages.")
@@ -54,25 +54,22 @@
 
 (defun hnreader--print-frontpage (dom buf)
   "Print raw DOM on BUF."
-  (message "am i here")
   (let ((things (dom-by-class dom "^athing$"))
         (subtexts (dom-by-class dom "^subtext$")))
     (with-current-buffer buf
       (read-only-mode -1)
       (erase-buffer)
       (insert "#+STARTUP: overview indent\n#")
-      (cl-mapcar #'hnreader--print-frontpage-item things subtexts))))
+      (cl-mapcar #'hnreader--print-frontpage-item things subtexts)
+      (org-mode))))
 
 (defun hnreader-frontpage ()
   "Testing."
   (hnreader--prepare-buffer (hnreader--get-hn-buffer))
   (promise-chain (hnreader--promise-dom "https://news.ycombinator.com/news")
-    ;; (promise-chain (howdoyou--curl-promise-dom "https://news.ycombinator.com/news")
     (then (lambda (result)
-            (message "got the dom")
             (hnreader--print-frontpage result (hnreader--get-hn-buffer))))
     (promise-catch (lambda (reason)
                      (message "catch error in promise prontpage: %s" reason)))))
-
 
 (provide 'hnreader)

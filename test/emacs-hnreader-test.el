@@ -2,7 +2,7 @@
 (ert-deftest-async test/promise-dom (done)
                    (promise-done
                     (promise-chain
-                        (hnreader--promise-dom "https://www.google.com")
+                        (hnreader--promise-dom "https://news.ycombinator.com/news")
                       (then (lambda (result)
                               (should (listp result))
                               ;; (message "%s" result)
