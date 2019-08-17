@@ -1,0 +1,8 @@
+#+STARTUP:    align fold hidestars oddeven indent 
+#+SEQ_TODO:   TODO(t) INPROGRESS(i) | DONE(d) CANCELED(c)
+* why not using hn api
+hn api will invole a lot of rest requests which would not be fast for emacs
+also the data layout is already available at hn webiste, one curl call and 
+then parse them to org would be faster
+* parse front page
+now what 
