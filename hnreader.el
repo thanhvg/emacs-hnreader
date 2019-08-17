@@ -8,9 +8,15 @@
 (defvar hn--buffer "*HN*"
   "Buffer for HN pages.")
 
+(defvar hn--comment-buffer "*HNComments*")
+
 (defun hnreader--get-hn-buffer ()
   "Get hn buffer."
   (get-buffer-create hn--buffer))
+
+(defun hnreader--get-hn-comment-buffer ()
+  "Get hn commnet buffer."
+  (get-buffer-create hn--comment-buffer))
 
 (defun hnreader--promise-dom (url)
   "Promise (url . dom) from URL with curl."
@@ -46,7 +52,8 @@
                   ;; points
                   (dom-text (dom-by-class subtext "^score$"))
                   ;; comments
-                  (dom-text (last (dom-children subtext)))))
+                  (dom-text (last (dom-by-tag subtext 'a)))))
+  ;; (setq thanh subtext)
   ;; link
   (insert (dom-attr (dom-by-class thing "^storylink$") 'href) "\n" )
   ;; comment link
