@@ -1,7 +1,7 @@
+(require 'promise)
 (require 'request)
 (require 'shr)
 (require 'dom)
-(require 'promise)
 (require 'cl-lib)
 
 
@@ -19,12 +19,8 @@
      (request url
               :parser (lambda () (libxml-parse-html-region (point-min) (point-max)))
               :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
-                                    (message "bad")
                                     (funcall reject  error-thrown)))
               :success (cl-function (lambda (&key data &allow-other-keys)
-                                      (message "yay")
-                                      (setq thanh data)
-                                      ;; (message "%s" data)
                                       (funcall resolve data)))))))
 
 (defun hnreader--prepare-buffer (buf &optional msg)
@@ -71,8 +67,12 @@
   "Testing."
   (hnreader--prepare-buffer (hnreader--get-hn-buffer))
   (promise-chain (hnreader--promise-dom "https://news.ycombinator.com/news")
+    ;; (promise-chain (howdoyou--curl-promise-dom "https://news.ycombinator.com/news")
     (then (lambda (result)
             (message "got the dom")
             (hnreader--print-frontpage result (hnreader--get-hn-buffer))))
     (promise-catch (lambda (reason)
                      (message "catch error in promise prontpage: %s" reason)))))
+
+
+(provide 'hnreader)
