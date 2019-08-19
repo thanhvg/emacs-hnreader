@@ -74,7 +74,7 @@ third one is 80.")
     (with-current-buffer buf
       (read-only-mode -1)
       (erase-buffer)
-      (insert "#+STARTUP: overview indent\n#")
+      (insert "#+STARTUP: overview indent\n")
       (cl-mapcar #'hnreader--print-frontpage-item things subtexts)
       (org-mode))))
 
@@ -84,13 +84,16 @@ third one is 80.")
     (with-current-buffer (hnreader--get-hn-comment-buffer)
       (read-only-mode -1)
       (erase-buffer)
+      (insert "#+STARTUP: overview indent\n")
       (dolist (comment comments)
         ;; (setq thanh comment)
         (insert (format "%s %s\n"
                         (hnreader--get-indent
                          (hnreader--get-img-tag-width comment))
                         (hnreader--get-comment-owner comment)))
-        (shr-insert-document (hnreader--get-comment comment))))))
+        (let ((shr-width 80))
+          (shr-insert-document (hnreader--get-comment comment))))
+      (org-mode))))
 
 (defun hnreader--get-img-tag-width (comment-dom)
   "Get width attribute of img tag in COMMENT-DOM."
@@ -113,6 +116,7 @@ third one is 80.")
 
 (defun hnreader-frontpage ()
   "Testing."
+  (interactive)
   (hnreader--prepare-buffer (hnreader--get-hn-buffer))
   (promise-chain (hnreader--promise-dom "https://news.ycombinator.com/news")
     (then (lambda (result)
@@ -122,6 +126,7 @@ third one is 80.")
 
 (defun hnreader-comment (comment-id)
   "Print hn COMMENT-ID page to buffer."
+  (interactive "sQuery: ")
   (hnreader--prepare-buffer (hnreader--get-hn-comment-buffer))
   (promise-chain (hnreader--promise-dom (format "https://news.ycombinator.com/item?id=%s" comment-id))
     (then #'hnreader--print-comments)
