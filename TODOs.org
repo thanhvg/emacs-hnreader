@@ -6,3 +6,14 @@ also the data layout is already available at hn webiste, one curl call and
 then parse them to org would be faster
 * parse front page
 now what 
+* parse comments
+          <table border="0" class='comment-tree'>
+            <tr class='athing comtr ' id='20724657'>
+comment are same level in regard to html node 
+but child comments have different ident block width
+
+top level comment
+                    <td class='ind'><img src="s.gif" height="1" width="0"></td>
+child 
+
+                    <td class='ind'><img src="s.gif" height="1" width="40"></td>
