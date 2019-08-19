@@ -17,3 +17,15 @@ top level comment
 child 
 
                     <td class='ind'><img src="s.gif" height="1" width="40"></td>
+* TODO show number of child comments
+https://emacs.stackexchange.com/questions/10245/counting-sub-headings-in-org-mode-using-elisp
+or recursive on dom will be just fine
+* TODO run eslip on org link
+
+#+begin_example org-mode
+[[elisp:(find-function 'describe-function)]]
+#+end_example
+
+[[elisp:(hnreader-comment 20724363)][read]
+
+* TODO comment page show main link and intro text

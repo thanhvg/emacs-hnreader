@@ -63,7 +63,9 @@ third one is 80.")
   ;; link
   (insert (dom-attr (dom-by-class thing "^storylink$") 'href) "\n" )
   ;; comment link
-  (insert "https://news.ycombinator.com/item?id=" (dom-attr thing 'id)))
+  (insert (format "[[elisp:(hnreader-comment %s)][https://news.ycombinator.com/item?id=%s]]"
+                  (dom-attr thing 'id)
+                  (dom-attr thing 'id))))
 
 (defun hnreader--print-frontpage (dom buf)
   "Print raw DOM on BUF."
@@ -87,8 +89,7 @@ third one is 80.")
         (insert (format "%s %s\n"
                         (hnreader--get-indent
                          (hnreader--get-img-tag-width comment))
-                        (hnreader--get-comment-owner comment)
-                        ))
+                        (hnreader--get-comment-owner comment)))
         (shr-insert-document (hnreader--get-comment comment))))))
 
 (defun hnreader--get-img-tag-width (comment-dom)
