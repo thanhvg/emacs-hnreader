@@ -33,3 +33,6 @@ or recursive on dom will be just fine
 * DONE comment page show main link and intro text
 * TODO display page takes page number
 * TODO reload page
+* TODO frontpage has next page link
+* remove * in text
+find and replace raw htlm '< *' with '< -'
