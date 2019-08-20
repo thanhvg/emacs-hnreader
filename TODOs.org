@@ -20,7 +20,7 @@ child
 * TODO show number of child comments
 https://emacs.stackexchange.com/questions/10245/counting-sub-headings-in-org-mode-using-elisp
 or recursive on dom will be just fine
-* DONE run eslip on org link
+* TODO run eslip on org link
 
 #+begin_example org-mode
 [[elisp:(find-function 'describe-function)]]
@@ -30,9 +30,55 @@ or recursive on dom will be just fine
 
       ;; (setq-local org-confirm-elisp-link-function nil)
       
+ user org-add-link-type to avoid confirm message
+ 
+ (org-add-link-type
+ "grep" 'endless/follow-grep-link)
+
+(defun endless/follow-grep-link (regexp)
+  "Run `rgrep' with REGEXP as argument."
+  (grep-compute-defaults)
+  (rgrep regexp "*" (expand-file-name "./")))
+https://endlessparentheses.com/use-org-mode-links-for-absolutely-anything.html
+
+use this one 
+
+(org-link-set-parameters TYPE &rest PARAMETERS)
+
+Set link TYPE properties to PARAMETERS.
+  PARAMETERS should be :key val pairs.
+how can i register this handler?
+autoload?
+
+just a private flag on running
+
 * DONE comment page show main link and intro text
 * TODO display page takes page number
 * TODO reload page
 * TODO frontpage has next page link
-* remove * in text
-find and replace raw htlm '< *' with '< -'
+* DONE remove * in text
+CLOSED: [2019-08-20 Tue 13:39]
+find and replace raw htlm '>*' with '>-'
+* add eww link
+* INPROGRESS long links are cut off
+(get-text-property (point) 'shr-url)
+(get-text-property (point) 'htmlize-link)
+(text-properties-at (point))
+
+(font-lock-multiline t htmlize-link (:uri "elisp:(hnreader-comment 20751164)")
+help-echo "LINK: elisp:(hnreader-comment 20751164)" keymap (keymap (follow-link
+. mouse-face) (mouse-3 . org-find-file-at-mouse) (mouse-2 . org-open-at-mouse))
+mouse-face highlight face org-link wrap-prefix #(" " 0 2 (face org-indent))
+line-prefix #(" " 0 2 (face org-indent)) fontified t)
+
+https://emacs.stackexchange.com/questions/16909/how-can-i-get-all-file-links-in-one-org-mode-file
+Assuming the current buffer is an org-mode buffer, the following code collects paths of file links in the current buffer.
+
+#+begin_example elisp
+(org-element-map (org-element-parse-buffer) 'link
+  (lambda (link)
+    (when (string= (org-element-property :type link) "file")
+      (org-element-property :path link))))
+#+end_example
+
+In an org buffer, (org-element-parse-buffer) returns the parse tree of the current buffer. And you can map over it with org-element-map.

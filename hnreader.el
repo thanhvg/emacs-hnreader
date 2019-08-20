@@ -43,7 +43,7 @@ third one is 80.")
   "Print MSG message and prepare window for BUF buffer."
   (when (not (equal (window-buffer) buf))
     (switch-to-buffer-other-window buf))
-    ;; (display-buffer buf '(display-buffer-use-some-window (inhibit-same-window . t))))
+  ;; (display-buffer buf '(display-buffer-use-some-window (inhibit-same-window . t))))
   (with-current-buffer buf
     (read-only-mode -1)
     (erase-buffer)
@@ -54,22 +54,24 @@ third one is 80.")
 
 (defun hnreader--print-frontpage-item (thing subtext)
   "Print THING dom and SUBTEXT dom."
-  (insert (format "\n* %s %s (%s) [%s]\n"
-                  ;; rank
-                  (dom-text (dom-by-class thing "^rank$"))
-                  ;; title
-                  (dom-text (dom-by-class thing "^storylink$"))
-                  ;; points
-                  (dom-text (dom-by-class subtext "^score$"))
-                  ;; comments
-                  (dom-text (last (dom-by-tag subtext 'a)))))
-  ;; (setq thanh subtext)
-  ;; link
-  (insert (dom-attr (dom-by-class thing "^storylink$") 'href) "\n" )
-  ;; comment link
-  (insert (format "[[elisp:(hnreader-comment %s)][https://news.ycombinator.com/item?id=%s]]"
-                  (dom-attr thing 'id)
-                  (dom-attr thing 'id))))
+  (let ((id (dom-attr thing 'id))
+        (story-link (dom-attr (dom-by-class thing "^storylink$") 'href)))
+    (insert (format "\n* %s %s (%s) [%s]\n"
+                    ;; rank
+                    (dom-text (dom-by-class thing "^rank$"))
+                    ;; title
+                    (dom-text (dom-by-class thing "^storylink$"))
+                    ;; points
+                    (dom-text (dom-by-class subtext "^score$"))
+                    ;; comments
+                    (dom-text (last (dom-by-tag subtext 'a)))))
+    ;; (setq thanh subtext)
+    ;; link
+    (insert (format "%s\n[[eww:%s][view story in eww]]\n" story-link story-link))
+    ;; comment link
+    (insert (format "[[elisp:(hnreader-comment %s)][https://news.ycombinator.com/item?id=%s]]"
+                    id
+                    id)) ))
 
 (defun hnreader--print-frontpage (dom buf)
   "Print raw DOM on BUF."
@@ -98,7 +100,8 @@ third one is 80.")
       (erase-buffer)
       (insert "#+STARTUP: indent\n")
       (insert "#+TITLE: " (car title))
-      (insert "\n" (cdr title))
+      (insert (format "\n%s\n[[eww:%s][view story in eww]]\n" (cdr title) (cdr title)))
+      ;; (insert "\n" (cdr title))
       (dolist (comment comments)
         ;; (setq thanh comment)
         (insert (format "%s %s\n"
