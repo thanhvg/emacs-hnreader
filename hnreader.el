@@ -38,8 +38,8 @@ third one is 80.")
 (defun hnreader--prepare-buffer (buf &optional msg)
   "Print MSG message and prepare window for BUF buffer."
   (when (not (equal (window-buffer) buf))
-    ;; (switch-to-buffer-other-window howdoi-buffer))
-    (display-buffer buf '(display-buffer-use-some-window (inhibit-same-window . t))))
+    (switch-to-buffer-other-window buf))
+    ;; (display-buffer buf '(display-buffer-use-some-window (inhibit-same-window . t))))
   (with-current-buffer buf
     (read-only-mode -1)
     (erase-buffer)
@@ -76,15 +76,24 @@ third one is 80.")
       (erase-buffer)
       (insert "#+STARTUP: overview indent\n")
       (cl-mapcar #'hnreader--print-frontpage-item things subtexts)
+      ;; (setq-local org-confirm-elisp-link-function nil)
       (org-mode))))
+
+(defun hnreader--get-title (dom)
+  "Get title and link from DOM comment page."
+  (let ((a-link (dom-by-class dom "^storylink$")))
+    (cons (dom-text a-link) (dom-attr a-link 'href))))
 
 (defun hnreader--print-comments (dom)
   "Print DOM comment page to buffer."
-  (let ((comments (dom-by-class  dom "^athing comtr $")))
+  (let ((comments (dom-by-class  dom "^athing comtr $"))
+        (title (hnreader--get-title dom)))
     (with-current-buffer (hnreader--get-hn-comment-buffer)
       (read-only-mode -1)
       (erase-buffer)
       (insert "#+STARTUP: overview indent\n")
+      (insert "#+TITLE: " (car title))
+      (insert "\n" (cdr title))
       (dolist (comment comments)
         ;; (setq thanh comment)
         (insert (format "%s %s\n"
@@ -104,7 +113,7 @@ third one is 80.")
 (defun hnreader--get-indent (width)
   "Return headline star string from WIDTH of img tag."
   (let ((stars "\n*")) (dotimes (_ (round (/ width hnreader--indent)) stars)
-                        (setq stars (concat stars "*")))))
+                         (setq stars (concat stars "*")))))
 
 (defun hnreader--get-comment-owner (comment-dom)
   "Return user who wrote this COMMENT-DOM."
@@ -124,13 +133,18 @@ third one is 80.")
     (promise-catch (lambda (reason)
                      (message "catch error in promise prontpage: %s" reason)))))
 
-(defun hnreader-comment (comment-id)
-  "Print hn COMMENT-ID page to buffer."
-  (interactive "sQuery: ")
+(defun hnreader-promise-comment (comment-id)
+  "Promise to print hn COMMENT-ID page to buffer."
   (hnreader--prepare-buffer (hnreader--get-hn-comment-buffer))
   (promise-chain (hnreader--promise-dom (format "https://news.ycombinator.com/item?id=%s" comment-id))
     (then #'hnreader--print-comments)
     (promise-catch (lambda (reason)
                      (message "catch error in promise comments: %s" reason)))))
+
+(defun hnreader-comment (comment-id)
+  "Print hn COMMENT-ID page to buffer."
+  (interactive "sQuery: ")
+  (hnreader-promise-comment comment-id)
+  nil)
 
 (provide 'hnreader)
