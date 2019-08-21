@@ -20,6 +20,8 @@ child
 * TODO show number of child comments
 https://emacs.stackexchange.com/questions/10245/counting-sub-headings-in-org-mode-using-elisp
 or recursive on dom will be just fine
+
+don't know about the performance impact
 * TODO run eslip on org link
 
 #+begin_example org-mode
@@ -60,7 +62,7 @@ just a private flag on running
 CLOSED: [2019-08-20 Tue 13:39]
 find and replace raw htlm '>*' with '>-'
 * add eww link
-* INPROGRESS long links are cut off
+* TODO long links are cut off
 (get-text-property (point) 'shr-url)
 (get-text-property (point) 'htmlize-link)
 (text-properties-at (point))
