@@ -22,7 +22,8 @@ https://emacs.stackexchange.com/questions/10245/counting-sub-headings-in-org-mod
 or recursive on dom will be just fine
 
 don't know about the performance impact
-* TODO run eslip on org link
+* DONE run eslip on org link
+CLOSED: [2019-08-21 Wed 23:46]
 
 #+begin_example org-mode
 [[elisp:(find-function 'describe-function)]]
@@ -55,11 +56,10 @@ autoload?
 just a private flag on running
 
 * DONE comment page show main link and intro text
-* TODO display page takes page number
+* DONE display page takes page number
 * TODO reload page
-* TODO frontpage has next page link
+* DONE frontpage has next page link
 * DONE remove * in text
-CLOSED: [2019-08-20 Tue 13:39]
 find and replace raw htlm '>*' with '>-'
 * add eww link
 * TODO long links are cut off
@@ -84,3 +84,5 @@ Assuming the current buffer is an org-mode buffer, the following code collects p
 #+end_example
 
 In an org buffer, (org-element-parse-buffer) returns the parse tree of the current buffer. And you can map over it with org-element-map.
+* DONE first run on comment buffer won't have right width
+also need to shadow shr-use-fonts to nil

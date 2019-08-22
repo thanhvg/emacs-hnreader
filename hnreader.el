@@ -5,18 +5,18 @@
 (require 'dom)
 (require 'cl-lib)
 
-(defvar hn--buffer "*HN*"
+(defvar hnreader--buffer "*HN*"
   "Buffer for HN pages.")
 
-(defvar hn--comment-buffer "*HNComments*")
+(defvar hnreader--comment-buffer "*HNComments*")
 
 (defun hnreader--get-hn-buffer ()
   "Get hn buffer."
-  (get-buffer-create hn--buffer))
+  (get-buffer-create hnreader--buffer))
 
 (defun hnreader--get-hn-comment-buffer ()
   "Get hn commnet buffer."
-  (get-buffer-create hn--comment-buffer))
+  (get-buffer-create hnreader--comment-buffer))
 
 (defvar hnreader--indent 40
   "Tab value which is the width of an indent.
@@ -73,6 +73,13 @@ third one is 80.")
                     id
                     id)) ))
 
+(defun hnreader--get-morelink (dom)
+  "Get more link from DOM."
+  (let ((more-link (dom-by-class dom "morelink")))
+    ;; (setq thanh more-link)
+    (format "\n* [[elisp:(hnreader-read-page \"https://news.ycombinator.com/%s\")][More]]"
+            (dom-attr more-link 'href))))
+
 (defun hnreader--print-frontpage (dom buf)
   "Print raw DOM on BUF."
   (let ((things (dom-by-class dom "^athing$"))
@@ -83,8 +90,10 @@ third one is 80.")
       (insert "#+STARTUP: overview indent\n")
       (cl-mapcar #'hnreader--print-frontpage-item things subtexts)
       ;; (setq-local org-confirm-elisp-link-function nil)
+      (insert (hnreader--get-morelink dom))
       (org-mode)
-      (goto-line 3))))
+      (goto-char (point-min))
+      (forward-line 2))))
 
 (defun hnreader--get-title (dom)
   "Get title and link from DOM comment page."
@@ -108,11 +117,13 @@ third one is 80.")
                         (hnreader--get-indent
                          (hnreader--get-img-tag-width comment))
                         (hnreader--get-comment-owner comment)))
-        (let ((shr-width 80))
+        (let ((shr-width 80)
+              (shr-use-fonts nil))
           (shr-insert-document (hnreader--get-comment comment))))
       (org-mode)
       (org-shifttab 3)
-      (goto-line 3))))
+      (goto-char (point-min))
+      (forward-line 2))))
 
 (defun hnreader--get-img-tag-width (comment-dom)
   "Get width attribute of img tag in COMMENT-DOM."
@@ -133,15 +144,41 @@ third one is 80.")
   "Get comment dom from COMMENT-DOM."
   (dom-by-class comment-dom "^commtext"))
 
-(defun hnreader-frontpage ()
-  "Testing."
-  (interactive)
+(defun hnreader-readpage-promise (url)
+  "Promise HN URL."
   (hnreader--prepare-buffer (hnreader--get-hn-buffer))
-  (promise-chain (hnreader--promise-dom "https://news.ycombinator.com/news")
+  (promise-chain (hnreader--promise-dom url)
     (then (lambda (result)
             (hnreader--print-frontpage result (hnreader--get-hn-buffer))))
     (promise-catch (lambda (reason)
                      (message "catch error in promise prontpage: %s" reason)))))
+
+(defun hnreader-read-page (url)
+  "Print HN URL page."
+  (interactive "sLink: ")
+  (message url)
+  (hnreader-readpage-promise url)
+  nil)
+
+(defun hnreader-front()
+  "Read front page."
+  (interactive)
+  (hnreader-read-page "https://news.ycombinator.com/news"))
+
+(defun hnreader-ask ()
+  "Read ask page."
+  (interactive)
+  (hnreader-read-page "https://news.ycombinator.com/ask"))
+
+(defun hnreader-show ()
+  "Read show page."
+  (interactive)
+  (hnreader-read-page "https://news.ycombinator.com/show"))
+
+(defun hnreader-jobs ()
+  "Read jobs page."
+  (interactive)
+  (hnreader-read-page "https://news.ycombinator.com/jobs"))
 
 (defun hnreader-promise-comment (comment-id)
   "Promise to print hn COMMENT-ID page to buffer."
@@ -153,7 +190,7 @@ third one is 80.")
 
 (defun hnreader-comment (comment-id)
   "Print hn COMMENT-ID page to buffer."
-  (interactive "sQuery: ")
+  (interactive "sComment ID: ")
   (hnreader-promise-comment comment-id)
   nil)
 
