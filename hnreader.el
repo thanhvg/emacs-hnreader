@@ -106,13 +106,17 @@ third one is 80.")
          (user (dom-by-class fat-item "^hnuser$"))
          (score (dom-by-class fat-item "^score$"))
          (tr-tag (dom-by-tag fat-item 'tr))
+         (comment-count (last (dom-by-tag (dom-by-class fat-item "^subtext$") 'a)))
          (intro (if (= (length tr-tag) 6)
                     (nth 3 tr-tag)
                   nil)))
+    ;; (setq thanh tr-tag)
+    ;; (setq thanh-fat fat-item)
     (cons
-     (format "%s | by %s\n"
+     (format "%s | by %s | %s\n"
              (dom-text score)
-             (dom-text user))
+             (dom-text user)
+             (dom-text comment-count))
      intro)))
 
 (defun hnreader--print-node (node)
