@@ -100,6 +100,21 @@ third one is 80.")
   (let ((a-link (dom-by-class dom "^storylink$")))
     (cons (dom-text a-link) (dom-attr a-link 'href))))
 
+(defun hnreader--get-post-info (dom)
+  "Get top info about the DOM comment page."
+  (let* ((fat-item (dom-by-class dom "^fatitem$"))
+         (tr-tag (dom-by-tag fat-item 'tr)))
+    (setq thanh fat-item)
+    (setq thanh-dom dom)
+    (seq-drop (seq-take tr-tag (- (length tr-tag) 1)) 1)))
+
+
+(defun hnreader--print-node (node)
+  "Print the NODE with extra options."
+  (let ((shr-width 80)
+        (shr-use-fonts nil))
+    (shr-insert-document node)))
+
 (defun hnreader--print-comments (dom)
   "Print DOM comment page to buffer."
   (let ((comments (dom-by-class  dom "^athing comtr $"))
@@ -110,6 +125,8 @@ third one is 80.")
       (insert "#+STARTUP: indent\n")
       (insert "#+TITLE: " (car title))
       (insert (format "\n%s\n[[eww:%s][view story in eww]]\n" (cdr title) (cdr title)))
+      (mapc #'hnreader--print-node (hnreader--get-post-info dom))
+      ;; (hnreader--print-node (hnreader--get-post-info dom))
       ;; (insert "\n" (cdr title))
       (dolist (comment comments)
         ;; (setq thanh comment)
@@ -117,9 +134,7 @@ third one is 80.")
                         (hnreader--get-indent
                          (hnreader--get-img-tag-width comment))
                         (hnreader--get-comment-owner comment)))
-        (let ((shr-width 80)
-              (shr-use-fonts nil))
-          (shr-insert-document (hnreader--get-comment comment))))
+          (hnreader--print-node (hnreader--get-comment comment)))
       (org-mode)
       (org-shifttab 3)
       (goto-char (point-min))
