@@ -86,6 +86,6 @@ Assuming the current buffer is an org-mode buffer, the following code collects p
 In an org buffer, (org-element-parse-buffer) returns the parse tree of the current buffer. And you can map over it with org-element-map.
 * DONE first run on comment buffer won't have right width
 also need to shadow shr-use-fonts to nil
-* TODO display OP post ins ask and OP infor
+* DONE display OP post ins ask and OP infor
 class fatitem is 4 long when ask it's 5 items long
 just take from 1 to the peniculate item with seq-take and seq-drop
