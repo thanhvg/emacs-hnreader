@@ -1,10 +1,67 @@
-;;; hnreader.el --- A HN reader -*- lexical-binding: t; -*-
+;;; hnreader.el --- A hackernews reader -*- lexical-binding: t; -*-
+
+;; Copyright (C) 2019  Thanh Vuong
+
+;; Author: Thanh Vuong <thanhvg@gmail.com>
+;; URL: https://github.com/thanhvg/emacs-hnreader/
+;; Package-Requires: ((emacs "25.1") (promise "1.1") (request "0.3.0") (org "9.2"))
+;; Version: 0.1
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+;; This package renders hackernews website at https://news.ycombinator.com/ in
+;; an org buffer. Almost everything works. Features that are not supported are
+;; account related features. You cannot add comment, downvote or upvote.
+
+;;; Dependencies
+;; `promise' and `request' are required.
+;; user must have `org-mode' 9.2 or later installed also.
+
+;;; Commands
+;; hnreader-news: Load news page.
+;; hnreader-past: Load past page.
+;; hnreader-ask: Load ask page.
+;; hnreader-show: Load show page.
+;; hnreader-more: Load more.
+;; hnreader-back: Go back to previous page.
+
+;;; Customization
+;; hnreader-history-max: max number history items to remember.
+
+;;; Code:
 (require 'promise)
 (require 'request)
 (require 'shr)
 (require 'dom)
 (require 'cl-lib)
+(require 'org)
 
+;; public variables
+(defgroup hnreader nil
+  "Search and read stackoverflow and sisters's sites."
+  :group 'extensions
+  :group 'convenience
+  :version "25.1"
+  :link '(emacs-commentary-link "hnreader.el"))
+
+(defcustom hnreader-history-max 100
+  "Max history to remember."
+  :type 'number
+  :group 'hnreader)
+
+;; internal stuff
 (defvar hnreader--buffer "*HN*"
   "Buffer for HN pages.")
 
@@ -20,9 +77,10 @@ third one is 80.")
 (defvar hnreader--history '()
   "History list.")
 
-(defvar hnreader-history-max 100
-  "Max history to remember.")
+(defvar hnreader--more-link nil
+  "Load more link.")
 
+;;;###autoload
 (defun hnreader-back ()
   "Go back to previous location in history."
   (let ((link (nth 1 hnreader--history)))
@@ -93,10 +151,12 @@ third one is 80.")
 
 (defun hnreader--get-morelink (dom)
   "Get more link from DOM."
-  (let ((more-link (dom-by-class dom "morelink")))
-    ;; (setq thanh more-link)
+  (let* ((more-link (dom-by-class dom "morelink"))
+         (full-more-link (concat "https://news.ycombinator.com/"
+                                 (dom-attr more-link 'href))))
+    (setq hnreader--more-link full-more-link)
     (format "[[elisp:(hnreader-read-page \"https://news.ycombinator.com/%s\")][More]]"
-            (dom-attr more-link 'href))))
+            full-more-link)))
 
 (defun hnreader--get-time-top-link (node)
   "Get date link in route /past from NODE."
@@ -253,30 +313,43 @@ Also upate `hnreader--history'."
   (hnreader-readpage-promise url)
   nil)
 
+;;;###autoload
 (defun hnreader-news()
   "Read front page."
   (interactive)
   (hnreader-read-page "https://news.ycombinator.com/news"))
 
+;;;###autoload
 (defun hnreader-past()
   "Read past page."
   (interactive)
   (hnreader-read-page "https://news.ycombinator.com/front"))
 
+;;;###autoload
 (defun hnreader-ask ()
   "Read ask page."
   (interactive)
   (hnreader-read-page "https://news.ycombinator.com/ask"))
 
+;;;###autoload
 (defun hnreader-show ()
   "Read show page."
   (interactive)
   (hnreader-read-page "https://news.ycombinator.com/show"))
 
+;;;###autoload
 (defun hnreader-jobs ()
   "Read jobs page."
   (interactive)
   (hnreader-read-page "https://news.ycombinator.com/jobs"))
+
+;;;###autoload
+(defun hnreader-more()
+  "Load more."
+  (interactive)
+  (if hnreader--more-link
+      (hnreader-read-page hnreader--more-link)
+    (message "no more link.")))
 
 (defun hnreader-promise-comment (comment-id)
   "Promise to print hn COMMENT-ID page to buffer."
@@ -294,3 +367,4 @@ Also upate `hnreader--history'."
   nil)
 
 (provide 'hnreader)
+;;; hnreader.el ends here
