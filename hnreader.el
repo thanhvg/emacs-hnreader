@@ -90,10 +90,19 @@ third one is 80.")
 
 (defun hnreader--past-time-top-links (node-list)
   "Get date, month and year links from NODE-LIST."
-  (seq-reduce (lambda (acc it)
-                (concat acc (hnreader--get-time-top-link it) " "))
-              node-list
-              "Go back to a "))
+  (if (= 3 (length node-list))
+         (concat (seq-reduce (lambda (acc it)
+                               (concat acc (hnreader--get-time-top-link it) " "))
+                             node-list
+                             "- Go back to a "))
+   (concat (seq-reduce (lambda (acc it)
+                         (concat acc (hnreader--get-time-top-link it) " "))
+                       (seq-take node-list 3)
+                       "- Go back to a ")
+           (seq-reduce (lambda (acc it)
+                         (concat acc (hnreader--get-time-top-link it) " "))
+                       (seq-drop node-list 3)
+                       "- Go forward to a "))))
 
 (defun hnreader--get-route-top-info (dom)
   "Get top info of route like title, date of hn routes such as front, past from DOM."
