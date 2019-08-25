@@ -80,6 +80,30 @@ third one is 80.")
     (format "\n* [[elisp:(hnreader-read-page \"https://news.ycombinator.com/%s\")][More]]"
             (dom-attr more-link 'href))))
 
+(defun hnreader--get-time-top-link (node)
+  "Get date link in route /past from NODE."
+  (let ((a-link (dom-attr (dom-by-tag node 'a) 'href))
+        (text (dom-texts node)))
+    (format "[[elisp:(hnreader-read-page \"https://news.ycombinator.com/%s\")][%s]]"
+            a-link
+            text)))
+
+(defun hnreader--past-time-top-links (node-list)
+  "Get date, month and year links from NODE-LIST."
+  (seq-reduce (lambda (acc it)
+                (concat acc (hnreader--get-time-top-link it) " "))
+              node-list
+              "Go back to a "))
+
+(defun hnreader--get-route-top-info (dom)
+  "Get top info of route like title, date of hn routes such as front, past from DOM."
+  (let* ((space-page (dom-by-id dom "^pagespace$"))
+         (title (dom-attr space-page 'title))
+         (hn-more (dom-by-class dom "^hnmore$")))
+    (format "\n%s %s"
+            title
+            (hnreader--past-time-top-links hn-more))))
+
 (defun hnreader--print-frontpage (dom buf)
   "Print raw DOM on BUF."
   (let ((things (dom-by-class dom "^athing$"))
@@ -88,6 +112,7 @@ third one is 80.")
       (read-only-mode -1)
       (erase-buffer)
       (insert "#+STARTUP: overview indent\n")
+      (insert (hnreader--get-route-top-info dom))
       (cl-mapcar #'hnreader--print-frontpage-item things subtexts)
       ;; (setq-local org-confirm-elisp-link-function nil)
       (insert (hnreader--get-morelink dom))
@@ -146,7 +171,7 @@ third one is 80.")
                         (hnreader--get-indent
                          (hnreader--get-img-tag-width comment))
                         (hnreader--get-comment-owner comment)))
-          (hnreader--print-node (hnreader--get-comment comment)))
+        (hnreader--print-node (hnreader--get-comment comment)))
       (org-mode)
       (org-shifttab 3)
       (goto-char (point-min))
@@ -183,14 +208,18 @@ third one is 80.")
 (defun hnreader-read-page (url)
   "Print HN URL page."
   (interactive "sLink: ")
-  (message url)
   (hnreader-readpage-promise url)
   nil)
 
-(defun hnreader-front()
+(defun hnreader-news()
   "Read front page."
   (interactive)
   (hnreader-read-page "https://news.ycombinator.com/news"))
+
+(defun hnreader-past()
+  "Read past page."
+  (interactive)
+  (hnreader-read-page "https://news.ycombinator.com/front"))
 
 (defun hnreader-ask ()
   "Read ask page."
