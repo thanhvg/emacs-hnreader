@@ -25,7 +25,7 @@ third one is 80.")
 
 (defun hnreader-back ()
   "Go back to previous location in history."
-  (let ((link (car hnreader--history)))
+  (let ((link (nth 1 hnreader--history)))
     (if link
         (progn
           (setq hnreader--history (cdr hnreader--history))
@@ -127,9 +127,11 @@ third one is 80.")
   (let* ((space-page (dom-by-id dom "^pagespace$"))
          (title (dom-attr space-page 'title))
          (hn-more (dom-by-class dom "^hnmore$")))
-    (format "\n%s %s"
-            title
-            (hnreader--past-time-top-links hn-more))))
+    (if hn-more
+        (format "\n%s %s"
+                title
+                (hnreader--past-time-top-links hn-more))
+      (format "\n%s" title))))
 
 (defun hnreader--print-frontpage (dom buf url)
   "Print raw DOM and URL on BUF."
@@ -189,7 +191,7 @@ third one is 80.")
     (with-current-buffer (hnreader--get-hn-comment-buffer)
       (read-only-mode -1)
       (erase-buffer)
-      (insert "#+STARTUP: indent\n")
+      (insert "#+STARTUP: overview indent\n")
       (insert "#+TITLE: " (car title))
       (insert (format "\n%s\n[[eww:%s][view story in eww]]\n" (cdr title) (cdr title)))
       (insert (car info))
@@ -205,7 +207,7 @@ third one is 80.")
         (hnreader--print-node (hnreader--get-comment comment)))
       (insert "\n* " (format  "[[elisp:(hnreader-comment %s)][Reload]]" id))
       (org-mode)
-      (org-shifttab 3)
+      ;; (org-shifttab 3)
       (goto-char (point-min))
       (forward-line 2))))
 
