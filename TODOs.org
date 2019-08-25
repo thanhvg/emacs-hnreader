@@ -17,7 +17,7 @@ top level comment
 child 
 
                     <td class='ind'><img src="s.gif" height="1" width="40"></td>
-* TODO show number of child comments
+* CANCELED show number of child comments
 https://emacs.stackexchange.com/questions/10245/counting-sub-headings-in-org-mode-using-elisp
 or recursive on dom will be just fine
 
@@ -87,5 +87,7 @@ In an org buffer, (org-element-parse-buffer) returns the parse tree of the curre
 * DONE first run on comment buffer won't have right width
 also need to shadow shr-use-fonts to nil
 * DONE display OP post ins ask and OP infor
-class fatitem is 4 long when ask it's 5 items long
+class fatitem is 4 long when ask it's 6 items long
 just take from 1 to the peniculate item with seq-take and seq-drop
+* DONE add back (history) button
+a variable to hold history

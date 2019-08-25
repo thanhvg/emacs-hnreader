@@ -8,7 +8,31 @@
 (defvar hnreader--buffer "*HN*"
   "Buffer for HN pages.")
 
-(defvar hnreader--comment-buffer "*HNComments*")
+(defvar hnreader--comment-buffer "*HNComments*"
+  "Comment buffer.")
+
+(defvar hnreader--indent 40
+  "Tab value which is the width of an indent.
+top level commnet is 0 indent
+second one is 40
+third one is 80.")
+
+(defvar hnreader--history '()
+  "History list.")
+
+(defvar hnreader-history-max 100
+  "Max history to remember.")
+
+(defun hnreader-back ()
+  "Go back to previous location in history."
+  (let ((link (car hnreader--history)))
+    (if link
+        (progn
+          (setq hnreader--history (cdr hnreader--history))
+          (when (> (length hnreader--history) hnreader-history-max)
+            (setq hnreader--history (seq-take hnreader--history hnreader-history-max)))
+          (hnreader-read-page-back link))
+      (message "Nothing to go back."))))
 
 (defun hnreader--get-hn-buffer ()
   "Get hn buffer."
@@ -17,12 +41,6 @@
 (defun hnreader--get-hn-comment-buffer ()
   "Get hn commnet buffer."
   (get-buffer-create hnreader--comment-buffer))
-
-(defvar hnreader--indent 40
-  "Tab value which is the width of an indent.
-top level commnet is 0 indent
-second one is 40
-third one is 80.")
 
 (defun hnreader--promise-dom (url)
   "Promise (url . dom) from URL with curl."
@@ -71,13 +89,13 @@ third one is 80.")
     ;; comment link
     (insert (format "[[elisp:(hnreader-comment %s)][https://news.ycombinator.com/item?id=%s]]"
                     id
-                    id)) ))
+                    id))))
 
 (defun hnreader--get-morelink (dom)
   "Get more link from DOM."
   (let ((more-link (dom-by-class dom "morelink")))
     ;; (setq thanh more-link)
-    (format "\n* [[elisp:(hnreader-read-page \"https://news.ycombinator.com/%s\")][More]]"
+    (format "[[elisp:(hnreader-read-page \"https://news.ycombinator.com/%s\")][More]]"
             (dom-attr more-link 'href))))
 
 (defun hnreader--get-time-top-link (node)
@@ -91,18 +109,18 @@ third one is 80.")
 (defun hnreader--past-time-top-links (node-list)
   "Get date, month and year links from NODE-LIST."
   (if (= 3 (length node-list))
-         (concat (seq-reduce (lambda (acc it)
-                               (concat acc (hnreader--get-time-top-link it) " "))
-                             node-list
-                             "- Go back to a "))
-   (concat (seq-reduce (lambda (acc it)
-                         (concat acc (hnreader--get-time-top-link it) " "))
-                       (seq-take node-list 3)
-                       "- Go back to a ")
-           (seq-reduce (lambda (acc it)
-                         (concat acc (hnreader--get-time-top-link it) " "))
-                       (seq-drop node-list 3)
-                       "- Go forward to a "))))
+      (concat (seq-reduce (lambda (acc it)
+                            (concat acc (hnreader--get-time-top-link it) " "))
+                          node-list
+                          "- Go back to a "))
+    (concat (seq-reduce (lambda (acc it)
+                          (concat acc (hnreader--get-time-top-link it) " "))
+                        (seq-take node-list 3)
+                        "- Go back to a ")
+            (seq-reduce (lambda (acc it)
+                          (concat acc (hnreader--get-time-top-link it) " "))
+                        (seq-drop node-list 3)
+                        "- Go forward to a "))))
 
 (defun hnreader--get-route-top-info (dom)
   "Get top info of route like title, date of hn routes such as front, past from DOM."
@@ -113,8 +131,8 @@ third one is 80.")
             title
             (hnreader--past-time-top-links hn-more))))
 
-(defun hnreader--print-frontpage (dom buf)
-  "Print raw DOM on BUF."
+(defun hnreader--print-frontpage (dom buf url)
+  "Print raw DOM and URL on BUF."
   (let ((things (dom-by-class dom "^athing$"))
         (subtexts (dom-by-class dom "^subtext$")))
     (with-current-buffer buf
@@ -124,7 +142,11 @@ third one is 80.")
       (insert (hnreader--get-route-top-info dom))
       (cl-mapcar #'hnreader--print-frontpage-item things subtexts)
       ;; (setq-local org-confirm-elisp-link-function nil)
-      (insert (hnreader--get-morelink dom))
+      (if hnreader--history
+          (insert "\n* "(format "[[elisp:(hnreader-back)][< Back]]" ) " | ")
+        (insert "\n* "))
+      (insert (hnreader--get-morelink dom) " | ")
+      (insert (format "[[elisp:(hnreader-read-page-back \"%s\")][Reload]]" url) )
       (org-mode)
       (goto-char (point-min))
       (forward-line 2))))
@@ -159,8 +181,8 @@ third one is 80.")
         (shr-use-fonts nil))
     (shr-insert-document node)))
 
-(defun hnreader--print-comments (dom)
-  "Print DOM comment page to buffer."
+(defun hnreader--print-comments (dom id)
+  "Print DOM comment and ID to buffer."
   (let ((comments (dom-by-class  dom "^athing comtr $"))
         (title (hnreader--get-title dom))
         (info (hnreader--get-post-info dom)))
@@ -181,6 +203,7 @@ third one is 80.")
                          (hnreader--get-img-tag-width comment))
                         (hnreader--get-comment-owner comment)))
         (hnreader--print-node (hnreader--get-comment comment)))
+      (insert "\n* " (format  "[[elisp:(hnreader-comment %s)][Reload]]" id))
       (org-mode)
       (org-shifttab 3)
       (goto-char (point-min))
@@ -210,13 +233,21 @@ third one is 80.")
   (hnreader--prepare-buffer (hnreader--get-hn-buffer))
   (promise-chain (hnreader--promise-dom url)
     (then (lambda (result)
-            (hnreader--print-frontpage result (hnreader--get-hn-buffer))))
+            (hnreader--print-frontpage result (hnreader--get-hn-buffer) url)))
     (promise-catch (lambda (reason)
                      (message "catch error in promise prontpage: %s" reason)))))
 
-(defun hnreader-read-page (url)
-  "Print HN URL page."
+(defun hnreader-read-page-back (url)
+  "Print HN URL page and won't change the history."
   (interactive "sLink: ")
+  (hnreader-readpage-promise url)
+  nil)
+
+(defun hnreader-read-page (url)
+  "Print HN URL page.
+Also upate `hnreader--history'."
+  (interactive "sLink: ")
+  (setq hnreader--history (cons url hnreader--history))
   (hnreader-readpage-promise url)
   nil)
 
@@ -249,7 +280,8 @@ third one is 80.")
   "Promise to print hn COMMENT-ID page to buffer."
   (hnreader--prepare-buffer (hnreader--get-hn-comment-buffer))
   (promise-chain (hnreader--promise-dom (format "https://news.ycombinator.com/item?id=%s" comment-id))
-    (then #'hnreader--print-comments)
+    (then (lambda (dom)
+            (hnreader--print-comments dom comment-id)))
     (promise-catch (lambda (reason)
                      (message "catch error in promise comments: %s" reason)))))
 
