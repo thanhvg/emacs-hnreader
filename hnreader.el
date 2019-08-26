@@ -155,7 +155,7 @@ third one is 80.")
          (full-more-link (concat "https://news.ycombinator.com/"
                                  (dom-attr more-link 'href))))
     (setq hnreader--more-link full-more-link)
-    (format "[[elisp:(hnreader-read-page \"https://news.ycombinator.com/%s\")][More]]"
+    (format "[[elisp:(hnreader-read-page \"%s\")][More]]"
             full-more-link)))
 
 (defun hnreader--get-time-top-link (node)
