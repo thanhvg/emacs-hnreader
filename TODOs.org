@@ -84,6 +84,14 @@ Assuming the current buffer is an org-mode buffer, the following code collects p
 #+end_example
 
 In an org buffer, (org-element-parse-buffer) returns the parse tree of the current buffer. And you can map over it with org-element-map.
+
+with the org buffer, run through it find the text prop of htmlize-link
+
+or hack shr insert link
+
+or a simple way chec in dom for a link and change it
+downside is speed, no we need to iterate and look for a tag and then mutate it, the push it back to the dom. Since the dom is a list 
+you need to map the whole dom
 * DONE first run on comment buffer won't have right width
 also need to shadow shr-use-fonts to nil
 * DONE display OP post ins ask and OP infor

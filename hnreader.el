@@ -286,9 +286,25 @@ third one is 80.")
   "Return user who wrote this COMMENT-DOM."
   (dom-text (dom-by-class comment-dom "^hnuser$")))
 
+(defun hnreader--it-to-it (it)
+  "Map node to node.
+IT is an element in the DOM tree. Map to different IT when it is
+a, img or pre. Othewise just copy"
+  (cond
+   ((and (listp it)
+         (listp (cdr it))) ;; check for list but not cons
+    (cond
+     ((and (equal (car it) 'a)
+           (not (dom-by-tag it 'img))) ;; bail out if img
+      ;; (dom-attr it 'href)
+      `(span nil ,(dom-attr it 'href)))
+     (t (mapcar #'hnreader--it-to-it it))))
+   (t it)))
+
 (defun hnreader--get-comment (comment-dom)
   "Get comment dom from COMMENT-DOM."
-  (dom-by-class comment-dom "^commtext"))
+  ;; (dom-by-class comment-dom "^commtext"))
+  (hnreader--it-to-it (dom-by-class comment-dom "^commtext")))
 
 (defun hnreader-readpage-promise (url)
   "Promise HN URL."
