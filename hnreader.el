@@ -39,6 +39,8 @@
 
 ;;; Customization
 ;; hnreader-history-max: max number history items to remember.
+;; hnreader-view-comments-in-same-window: if nil then will not create new window
+;; when viewing comments
 
 ;;; Code:
 (require 'promise)
@@ -58,7 +60,12 @@
 
 (defcustom hnreader-history-max 100
   "Max history to remember."
-  :type 'number
+  :type 'integer
+  :group 'hnreader)
+
+(defcustom hnreader-view-comments-in-same-window t
+  "Max history to remember."
+  :type 'boolean
   :group 'hnreader)
 
 ;; internal stuff
@@ -118,7 +125,10 @@ third one is 80.")
 (defun hnreader--prepare-buffer (buf &optional msg)
   "Print MSG message and prepare window for BUF buffer."
   (when (not (equal (window-buffer) buf))
-    (switch-to-buffer-other-window buf))
+    (if hnreader-view-comments-in-same-window
+        ;; (switch-to-buffer buf)
+        (pop-to-buffer buf)
+      (switch-to-buffer-other-window buf)))
   ;; (display-buffer buf '(display-buffer-use-some-window (inhibit-same-window . t))))
   (with-current-buffer buf
     (read-only-mode -1)

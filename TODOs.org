@@ -57,7 +57,7 @@ just a private flag on running
 
 * DONE comment page show main link and intro text
 * DONE display page takes page number
-* TODO reload page
+* DONE reload page
 * DONE frontpage has next page link
 * DONE remove * in text
 find and replace raw htlm '>*' with '>-'
@@ -107,3 +107,5 @@ class fatitem is 4 long when ask it's 6 items long
 just take from 1 to the peniculate item with seq-take and seq-drop
 * DONE add back (history) button
 a variable to hold history
+* DONE option to open comment in same window
+use pop-to-buffer
