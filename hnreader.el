@@ -127,7 +127,7 @@ third one is 80.")
   (when (not (equal (window-buffer) buf))
     (if hnreader-view-comments-in-same-window
         ;; (switch-to-buffer buf)
-        (pop-to-buffer buf)
+        (select-window (display-buffer buf '(display-buffer-use-some-window)))
       (switch-to-buffer-other-window buf)))
   ;; (display-buffer buf '(display-buffer-use-some-window (inhibit-same-window . t))))
   (with-current-buffer buf

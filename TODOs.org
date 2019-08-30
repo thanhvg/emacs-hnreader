@@ -108,4 +108,7 @@ just take from 1 to the peniculate item with seq-take and seq-drop
 * DONE add back (history) button
 a variable to hold history
 * DONE option to open comment in same window
-use pop-to-buffer
+use pop-to-buffer isn't what we want, pop-to-buffer-same-window looks the same
+as switch-to-buffer display-buffer returns windows most of the time, so use it
+instead with select-window
+        (select-window (display-buffer buf '(display-buffer-use-some-window)))
