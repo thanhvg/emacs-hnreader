@@ -62,7 +62,7 @@ just a private flag on running
 * DONE remove * in text
 find and replace raw htlm '>*' with '>-'
 * add eww link
-* TODO long links are cut off
+* DONE long links are cut off
 (get-text-property (point) 'shr-url)
 (get-text-property (point) 'htmlize-link)
 (text-properties-at (point))
@@ -89,9 +89,17 @@ with the org buffer, run through it find the text prop of htmlize-link
 
 or hack shr insert link
 
-or a simple way chec in dom for a link and change it
+** or a simple way chec in dom for a link and change it
 downside is speed, no we need to iterate and look for a tag and then mutate it, the push it back to the dom. Since the dom is a list 
+
 you need to map the whole dom
+
+it works but it seems a bit slow (can't confirm thsi) and long links looks ugly
+** got through the buffer look for each char
+- get its text properties 'shr-url and 'htmlize-link 
+if they are the same then ok, if not assign htmlize-link to value of 'shr-url
+better use 
+https://www.gnu.org/software/emacs/manual/html_node/elisp/Property-Search.html#Property-Search
 * DONE first run on comment buffer won't have right width
 also need to shadow shr-use-fonts to nil
 * DONE display OP post ins ask and OP infor
