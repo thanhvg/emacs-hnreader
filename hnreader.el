@@ -90,6 +90,7 @@ third one is 80.")
 ;;;###autoload
 (defun hnreader-back ()
   "Go back to previous location in history."
+  (interactive)
   (let ((link (nth 1 hnreader--history)))
     (if link
         (progn
