@@ -31,13 +31,13 @@ https://github.com/thanhvg/spacemacs-eos
 User must have ~org-mode~ 9.2 or later installed also.
 
 * Commands
-~hnreader-news~: Load news page.
-~hnreader-past~: Load past page.
-~hnreader-ask~: Load ask page.
-~hnreader-show~: Load show page.
-~hnreader-newest~: Load new link page.
-~hnreader-more~: Load more.
-~hnreader-back~: Go back to previous page.
+- ~hnreader-news~: Load news page.
+- ~hnreader-past~: Load past page.
+- ~hnreader-ask~: Load ask page.
+- ~hnreader-show~: Load show page.
+- ~hnreader-newest~: Load new link page.
+- ~hnreader-more~: Load more.
+- ~hnreader-back~: Go back to previous page.
 * Remarks
 Listing buffer is called ~*HN*~
 Command buffer is called ~*HNComments*~
