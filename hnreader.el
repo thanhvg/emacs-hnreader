@@ -34,6 +34,7 @@
 ;; hnreader-past: Load past page.
 ;; hnreader-ask: Load ask page.
 ;; hnreader-show: Load show page.
+;; hnreader-newest: Load new link page.
 ;; hnreader-more: Load more.
 ;; hnreader-back: Go back to previous page.
 
@@ -139,6 +140,15 @@ third one is 80.")
               "Loading...")))
   buf)
 
+(defun hnreader--print-header ()
+  "Print header links to current buffer."
+  (insert "[[elisp:(hnreader-news)][News]] | ")
+  (insert "[[elisp:(hnreader-newest)][New]] | ")
+  (insert "[[elisp:(hnreader-past)][Past]] | ")
+  (insert "[[elisp:(hnreader-ask)][Ask]] | ")
+  (insert "[[elisp:(hnreader-show)][Show]] | ")
+  (insert "[[elisp:(hnreader-jobs)][Jobs]]"))
+
 (defun hnreader--print-frontpage-item (thing subtext)
   "Print THING dom and SUBTEXT dom."
   (let ((id (dom-attr thing 'id))
@@ -212,6 +222,7 @@ third one is 80.")
       (read-only-mode -1)
       (erase-buffer)
       (insert "#+STARTUP: overview indent\n")
+      (hnreader--print-header)
       (insert (hnreader--get-route-top-info dom))
       (cl-mapcar #'hnreader--print-frontpage-item things subtexts)
       ;; (setq-local org-confirm-elisp-link-function nil)
@@ -349,6 +360,12 @@ Also upate `hnreader--history'."
   "Read past page."
   (interactive)
   (hnreader-read-page "https://news.ycombinator.com/front"))
+
+;;;###autoload
+(defun hnreader-newest()
+  "Read past page."
+  (interactive)
+  (hnreader-read-page "https://news.ycombinator.com/newest"))
 
 ;;;###autoload
 (defun hnreader-ask ()
