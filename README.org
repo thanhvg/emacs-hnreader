@@ -10,7 +10,7 @@ Comments:
 
 [[file:docs/screenshot2.png]]
 
-[[file:docs/screencast.webm]]
+[[file:docs/screencast.gif]]
 
 * Intro
 This package renders hackernews website at https://news.ycombinator.com/ in an
