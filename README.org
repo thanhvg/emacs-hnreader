@@ -10,6 +10,8 @@ Comments:
 
 [[file:docs/screenshot2.png]]
 
+[[file:docs/screencast.webm]]
+
 * Intro
 This package renders hackernews website at https://news.ycombinator.com/ in an
 org buffer. Almost everything works. 
