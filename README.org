@@ -23,7 +23,9 @@ comment, downvote or upvote.
 
 * Install
 Manual: TBD
+
 Melpa
+
 [[https://melpa.org/#/hnreader][file:https://melpa.org/packages/hnreader-badge.svg]]
 
 Spacemacs layer:
