@@ -422,6 +422,7 @@ Also upate `hnreader--history'."
               "1")))
     (hnreader-comment id)))
 
+;;;###autoload
 (defun hnreader-org-insert-hn-link (url)
   "Insert link in org buffer to open a hn item link"
   (interactive "sUrl: ")
