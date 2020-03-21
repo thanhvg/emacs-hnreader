@@ -37,6 +37,7 @@
 ;; hnreader-newest: Load new link page.
 ;; hnreader-more: Load more.
 ;; hnreader-back: Go back to previous page.
+;; hnreader-read-item: read an HN item url such as https://news.ycombinator.com/item?id=1
 
 ;;; Customization
 ;; hnreader-history-max: max number history items to remember.
@@ -88,6 +89,9 @@ third one is 80.")
 (defvar hnreader--more-link nil
   "Load more link.")
 
+(defvar hnreader--regex-id "id=\\([0-9]*\\)"
+  "Regex to capture id in url.")
+
 ;;;###autoload
 (defun hnreader-back ()
   "Go back to previous location in history."
@@ -114,15 +118,15 @@ third one is 80.")
   (promise-new
    (lambda (resolve reject)
      (request url
-              :parser (lambda ()
-                        (goto-char (point-min))
-                        (while (re-search-forward ">\\*" nil t)
-                          (replace-match ">-"))
-                        (libxml-parse-html-region (point-min) (point-max)))
-              :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
-                                    (funcall reject  error-thrown)))
-              :success (cl-function (lambda (&key data &allow-other-keys)
-                                      (funcall resolve data)))))))
+       :parser (lambda ()
+                 (goto-char (point-min))
+                 (while (re-search-forward ">\\*" nil t)
+                   (replace-match ">-"))
+                 (libxml-parse-html-region (point-min) (point-max)))
+       :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
+                             (funcall reject  error-thrown)))
+       :success (cl-function (lambda (&key data &allow-other-keys)
+                               (funcall resolve data)))))))
 
 (defun hnreader--prepare-buffer (buf &optional msg)
   "Print MSG message and prepare window for BUF buffer."
@@ -402,11 +406,32 @@ Also upate `hnreader--history'."
     (promise-catch (lambda (reason)
                      (message "catch error in promise comments: %s" reason)))))
 
+;;;###autoload
 (defun hnreader-comment (comment-id)
   "Print hn COMMENT-ID page to buffer."
   (interactive "sComment ID: ")
   (hnreader-promise-comment comment-id)
   nil)
+
+;;;###autoload
+(defun hnreader-read-item (url)
+  "Print hn item URL page to buffer."
+  (interactive "sUrl: ")
+  (let ((id (if (string-match hnreader--regex-id url)
+                (match-string 1 url)
+              "1")))
+    (hnreader-comment id)))
+
+(defun hnreader-org-insert-hn-link (url)
+  "Insert link in org buffer to open a hn item link"
+  (interactive "sUrl: ")
+  (when-let (id (if (string-match hnreader--regex-id url)
+                    (match-string 1 url)
+                  nil))
+    (with-current-buffer (current-buffer)
+      (insert (format "[[elisp:(hnreader-comment %s)][https://news.ycombinator.com/item?id=%s]]"
+                      id
+                      id)))))
 
 (provide 'hnreader)
 ;;; hnreader.el ends here

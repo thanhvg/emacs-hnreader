@@ -44,6 +44,10 @@ User must have ~org-mode~ 9.2 or later installed also.
 - ~hnreader-newest~: Load new link page.
 - ~hnreader-more~: Load more.
 - ~hnreader-back~: Go back to previous page.
+- ~hnreader-read-item~: read an HN item url such as
+  https://news.ycombinator.com/item?id=1 this is handy when you have the link
+  and want to read it in emacs, takes url as param
+- ~hnreader-org-insert-hn-link~: insert hn link to org buffer, take url as param
 * Remarks
 Listing buffer is called ~*HN*~
 Command buffer is called ~*HNComments*~
@@ -128,7 +132,4 @@ Hack to use `insert-sliced-image' to avoid jerky image scrolling."
             image)
         (insert (or alt "")))))
 #+end_src
-
-* Demo
-TBD
 
