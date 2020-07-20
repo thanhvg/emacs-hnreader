@@ -5,7 +5,7 @@
 ;; Author: Thanh Vuong <thanhvg@gmail.com>
 ;; URL: https://github.com/thanhvg/emacs-hnreader/
 ;; Package-Requires: ((emacs "25.1") (promise "1.1") (request "0.3.0") (org "9.2"))
-;; Version: 0.1
+;; Version: 0.2
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@
 ;; hnreader-newest: Load new link page.
 ;; hnreader-more: Load more.
 ;; hnreader-back: Go back to previous page.
-;; hnreader-read-item: read an HN item url such as https://news.ycombinator.com/item?id=1
+;; hnreader-comment: read an HN item url such as https://news.ycombinator.com/item?id=1
 
 ;;; Customization
 ;; hnreader-history-max: max number history items to remember.
@@ -88,9 +88,6 @@ third one is 80.")
 
 (defvar hnreader--more-link nil
   "Load more link.")
-
-(defvar hnreader--regex-id "id=\\([0-9]*\\)"
-  "Regex to capture id in url.")
 
 ;;;###autoload
 (defun hnreader-back ()
@@ -155,7 +152,7 @@ third one is 80.")
 
 (defun hnreader--print-frontpage-item (thing subtext)
   "Print THING dom and SUBTEXT dom."
-  (let ((id (dom-attr thing 'id))
+  (let ((url (format "https://news.ycombinator.com/item?id=%s" (dom-attr thing 'id)))
         (story-link (dom-attr (dom-by-class thing "^storylink$") 'href)))
     (insert (format "\n* %s %s (%s) [%s]\n"
                     ;; rank
@@ -170,9 +167,9 @@ third one is 80.")
     ;; link
     (insert (format "%s\n[[eww:%s][view story in eww]]\n" story-link story-link))
     ;; comment link
-    (insert (format "[[elisp:(hnreader-comment %s)][https://news.ycombinator.com/item?id=%s]]"
-                    id
-                    id))))
+    (insert (format "[[elisp:(hnreader-comment \"%s\")][%s]]"
+                    url
+                    url))))
 
 (defun hnreader--get-morelink (dom)
   "Get more link from DOM."
@@ -269,11 +266,12 @@ third one is 80.")
         (shr-use-fonts nil))
     (shr-insert-document node)))
 
-(defun hnreader--print-comments (dom id)
-  "Print DOM comment and ID to buffer."
-  (let ((comments (dom-by-class  dom "^athing comtr $"))
+(defun hnreader--print-comments (dom url)
+  "Print DOM comment and URL to buffer."
+  (let ((comments (dom-by-class dom "^athing comtr $"))
         (title (hnreader--get-title dom))
-        (info (hnreader--get-post-info dom)))
+        (info (hnreader--get-post-info dom))
+        (more-link (dom-by-class dom "morelink")))
     (with-current-buffer (hnreader--get-hn-comment-buffer)
       (read-only-mode -1)
       (erase-buffer)
@@ -291,7 +289,10 @@ third one is 80.")
                          (hnreader--get-img-tag-width comment))
                         (hnreader--get-comment-owner comment)))
         (hnreader--print-node (hnreader--get-comment comment)))
-      (insert "\n* " (format  "[[elisp:(hnreader-comment %s)][Reload]]" id))
+      (when more-link
+        (insert "\n* " (format "[[elisp:(hnreader-comment \"%s\")][More]]" (concat "https://news.ycombinator.com/"
+                                                                                   (dom-attr more-link 'href)))))
+      (insert "\n* " (format  "[[elisp:(hnreader-comment \"%s\")][Reload]]" url))
       (org-mode)
       ;; (org-shifttab 3)
       (goto-char (point-min))
@@ -397,42 +398,38 @@ Also upate `hnreader--history'."
       (hnreader-read-page hnreader--more-link)
     (message "no more link.")))
 
-(defun hnreader-promise-comment (comment-id)
-  "Promise to print hn COMMENT-ID page to buffer."
+(defun hnreader-promise-comment (url)
+  "Promise to print hn URL page to buffer."
   (hnreader--prepare-buffer (hnreader--get-hn-comment-buffer))
-  (promise-chain (hnreader--promise-dom (format "https://news.ycombinator.com/item?id=%s" comment-id))
+  (promise-chain (hnreader--promise-dom url)
+    (then (lambda (dom)
+            (hnreader--print-comments dom url)))
+    (promise-catch (lambda (reason)
+                     (message "catch error in promise comments: %s" reason)))))
+
+(defun hnreader-promise-item (url)
+  "Promise to print hn URL page to buffer."
+  (hnreader--prepare-buffer (hnreader--get-hn-comment-buffer))
+  (promise-chain (hnreader--promise-dom url)
     (then (lambda (dom)
             (hnreader--print-comments dom comment-id)))
     (promise-catch (lambda (reason)
                      (message "catch error in promise comments: %s" reason)))))
 
 ;;;###autoload
-(defun hnreader-comment (comment-id)
-  "Print hn COMMENT-ID page to buffer."
-  (interactive "sComment ID: ")
-  (hnreader-promise-comment comment-id)
+(defun hnreader-comment (url)
+  "Print hn URL page to buffer."
+  (hnreader-promise-comment url)
   nil)
-
-;;;###autoload
-(defun hnreader-read-item (url)
-  "Print hn item URL page to buffer."
-  (interactive "sUrl: ")
-  (let ((id (if (string-match hnreader--regex-id url)
-                (match-string 1 url)
-              "1")))
-    (hnreader-comment id)))
 
 ;;;###autoload
 (defun hnreader-org-insert-hn-link (url)
   "Insert link in org buffer to open a hn item link"
   (interactive "sUrl: ")
-  (when-let (id (if (string-match hnreader--regex-id url)
-                    (match-string 1 url)
-                  nil))
     (with-current-buffer (current-buffer)
-      (insert (format "[[elisp:(hnreader-comment %s)][https://news.ycombinator.com/item?id=%s]]"
-                      id
-                      id)))))
+      (insert (format "[[elisp:(hnreader-comment \"%s\")][%s]]"
+                      url
+                      url))))
 
 (provide 'hnreader)
 ;;; hnreader.el ends here

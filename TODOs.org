@@ -121,3 +121,7 @@ extract id then pass to hnreader-comment
 * DONE add function to insert hn item to org buffer
 CLOSED: [2020-03-21 Sat 12:48]
 [[elisp:(hnreader-comment 1)][https://news.ycombinator.com/item?id=1]]
+* DONE refactor hnreader-comment to take url instead of id
+CLOSED: [2020-07-19 Sun 21:49]
+it reads comment id 
+actually we don't need it just read the url instead
