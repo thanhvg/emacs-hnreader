@@ -419,6 +419,7 @@ Also upate `hnreader--history'."
 ;;;###autoload
 (defun hnreader-comment (url)
   "Print hn URL page to buffer."
+  (interactive "sLink: ")
   (hnreader-promise-comment url)
   nil)
 
