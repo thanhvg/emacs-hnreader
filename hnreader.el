@@ -268,7 +268,7 @@ third one is 80.")
 
 (defun hnreader--print-comments (dom url)
   "Print DOM comment and URL to buffer."
-  (let ((comments (dom-by-class dom "^athing comtr $"))
+  (let ((comments (dom-by-class dom "^athing comtr$"))
         (title (hnreader--get-title dom))
         (info (hnreader--get-post-info dom))
         (more-link (dom-by-class dom "morelink")))
