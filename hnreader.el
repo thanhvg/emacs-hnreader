@@ -407,15 +407,6 @@ Also upate `hnreader--history'."
     (promise-catch (lambda (reason)
                      (message "catch error in promise comments: %s" reason)))))
 
-(defun hnreader-promise-item (url)
-  "Promise to print hn URL page to buffer."
-  (hnreader--prepare-buffer (hnreader--get-hn-comment-buffer))
-  (promise-chain (hnreader--promise-dom url)
-    (then (lambda (dom)
-            (hnreader--print-comments dom comment-id)))
-    (promise-catch (lambda (reason)
-                     (message "catch error in promise comments: %s" reason)))))
-
 ;;;###autoload
 (defun hnreader-comment (url)
   "Print hn URL page to buffer."
@@ -427,10 +418,10 @@ Also upate `hnreader--history'."
 (defun hnreader-org-insert-hn-link (url)
   "Insert link in org buffer to open a hn item link"
   (interactive "sUrl: ")
-    (with-current-buffer (current-buffer)
-      (insert (format "[[elisp:(hnreader-comment \"%s\")][%s]]"
-                      url
-                      url))))
+  (with-current-buffer (current-buffer)
+    (insert (format "[[elisp:(hnreader-comment \"%s\")][%s]]"
+                    url
+                    url))))
 
 (provide 'hnreader)
 ;;; hnreader.el ends here
