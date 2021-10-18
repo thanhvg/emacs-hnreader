@@ -5,7 +5,7 @@
 ;; Author: Thanh Vuong <thanhvg@gmail.com>
 ;; URL: https://github.com/thanhvg/emacs-hnreader/
 ;; Package-Requires: ((emacs "25.1") (promise "1.1") (request "0.3.0") (org "9.2"))
-;; Version: 0.2
+;; Version: 0.2.1
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -43,6 +43,9 @@
 ;; hnreader-history-max: max number history items to remember.
 ;; hnreader-view-comments-in-same-window: if nil then will not create new window
 ;; when viewing comments
+
+;;; Changelog
+;; 0.2.1 2021-10-18 update css class grab for entry title
 
 ;;; Code:
 (require 'promise)
@@ -153,19 +156,19 @@ third one is 80.")
 (defun hnreader--print-frontpage-item (thing subtext)
   "Print THING dom and SUBTEXT dom."
   (let ((url (format "https://news.ycombinator.com/item?id=%s" (dom-attr thing 'id)))
-        (story-link (dom-attr (dom-by-class thing "^storylink$") 'href)))
+        (title-link (dom-attr (dom-by-class thing "^titlelink$") 'href)))
     (insert (format "\n* %s %s (%s) [%s]\n"
                     ;; rank
                     (dom-text (dom-by-class thing "^rank$"))
                     ;; title
-                    (dom-text (dom-by-class thing "^storylink$"))
+                    (dom-text (dom-by-class thing "^titlelink$"))
                     ;; points
                     (dom-text (dom-by-class subtext "^score$"))
                     ;; comments
                     (dom-text (last (dom-by-tag subtext 'a)))))
     ;; (setq thanh subtext)
     ;; link
-    (insert (format "%s\n[[eww:%s][view story in eww]]\n" story-link story-link))
+    (insert (format "%s\n[[eww:%s][view story in eww]]\n" title-link title-link))
     ;; comment link
     (insert (format "[[elisp:(hnreader-comment \"%s\")][%s]]"
                     url
@@ -238,7 +241,7 @@ third one is 80.")
 
 (defun hnreader--get-title (dom)
   "Get title and link from DOM comment page."
-  (let ((a-link (dom-by-class dom "^storylink$")))
+  (let ((a-link (dom-by-class dom "^titlelink$")))
     (cons (dom-text a-link) (dom-attr a-link 'href))))
 
 (defun hnreader--get-post-info (dom)
