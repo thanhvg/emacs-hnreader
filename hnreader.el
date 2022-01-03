@@ -35,6 +35,7 @@
 ;; hnreader-ask: Load ask page.
 ;; hnreader-show: Load show page.
 ;; hnreader-newest: Load new link page.
+;; hnreader-best: Load page with best articles.
 ;; hnreader-more: Load more.
 ;; hnreader-back: Go back to previous page.
 ;; hnreader-comment: read an HN item url such as https://news.ycombinator.com/item?id=1
@@ -151,7 +152,8 @@ third one is 80.")
   (insert "[[elisp:(hnreader-past)][Past]] | ")
   (insert "[[elisp:(hnreader-ask)][Ask]] | ")
   (insert "[[elisp:(hnreader-show)][Show]] | ")
-  (insert "[[elisp:(hnreader-jobs)][Jobs]]"))
+  (insert "[[elisp:(hnreader-jobs)][Jobs]] | ")
+  (insert "[[elisp:(hnreader-best)][Best]]"))
 
 (defun hnreader--print-frontpage-item (thing subtext)
   "Print THING dom and SUBTEXT dom."
@@ -392,6 +394,12 @@ Also upate `hnreader--history'."
   "Read jobs page."
   (interactive)
   (hnreader-read-page "https://news.ycombinator.com/jobs"))
+
+;;;###autoload
+(defun hnreader-best ()
+  "Read page with best/top items."
+  (interactive)
+  (hnreader-read-page "https://news.ycombinator.com/best"))
 
 ;;;###autoload
 (defun hnreader-more()
