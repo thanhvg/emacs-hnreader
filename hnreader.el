@@ -5,7 +5,7 @@
 ;; Author: Thanh Vuong <thanhvg@gmail.com>
 ;; URL: https://github.com/thanhvg/emacs-hnreader/
 ;; Package-Requires: ((emacs "25.1") (promise "1.1") (request "0.3.0") (org "9.2"))
-;; Version: 0.2.1
+;; Version: 0.2.2
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@
 ;; when viewing comments
 
 ;;; Changelog
+;; 0.2.2 2022-09-27 update css class grab for entry title
 ;; 0.2.1 2021-10-18 update css class grab for entry title
 
 ;;; Code:
@@ -157,13 +158,14 @@ third one is 80.")
 
 (defun hnreader--print-frontpage-item (thing subtext)
   "Print THING dom and SUBTEXT dom."
-  (let ((url (format "https://news.ycombinator.com/item?id=%s" (dom-attr thing 'id)))
-        (title-link (dom-attr (dom-by-class thing "^titlelink$") 'href)))
+  (let* ((url (format "https://news.ycombinator.com/item?id=%s" (dom-attr thing 'id)))
+         (a-node (dom-child-by-tag (dom-by-class thing "^titleline$") 'a))
+         (title-link (dom-attr a-node 'href)))
     (insert (format "\n* %s %s (%s) [%s]\n"
                     ;; rank
                     (dom-text (dom-by-class thing "^rank$"))
                     ;; title
-                    (dom-text (dom-by-class thing "^titlelink$"))
+                    (dom-text a-node)
                     ;; points
                     (dom-text (dom-by-class subtext "^score$"))
                     ;; comments
@@ -243,7 +245,7 @@ third one is 80.")
 
 (defun hnreader--get-title (dom)
   "Get title and link from DOM comment page."
-  (let ((a-link (dom-by-class dom "^titlelink$")))
+  (let ((a-link (dom-child-by-tag (dom-by-class dom "^titleline$") 'a)))
     (cons (dom-text a-link) (dom-attr a-link 'href))))
 
 (defun hnreader--get-post-info (dom)
