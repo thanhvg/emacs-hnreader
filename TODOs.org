@@ -125,3 +125,8 @@ CLOSED: [2020-03-21 Sat 12:48]
 CLOSED: [2020-07-19 Sun 21:49]
 it reads comment id 
 actually we don't need it just read the url instead
+* DONE add reply link under each comment
+CLOSED: [2022-11-15 Tue 21:30]
+link can be hidden some where as text properties?
+
+just show the links, reply only shows for live discussion
