@@ -327,7 +327,7 @@ third one is 80.")
 (defun hnreader--it-to-it (it)
   "Map node to node.
 IT is an element in the DOM tree. Map to different IT when it is
-a, img or pre. Othewise just copy"
+a, img or pre. Otherwise copy"
   (if (and (listp it)
            (listp (cdr it))) ;; check for list but not cons
       (if (and (equal (car it) 'a)
@@ -340,7 +340,10 @@ a, img or pre. Othewise just copy"
 (defun hnreader--get-comment (comment-dom)
   "Get comment dom from COMMENT-DOM."
   ;; (dom-by-class comment-dom "^commtext"))
-  (hnreader--it-to-it (dom-by-class comment-dom "^commtext")))
+  ;; (setq thanh comment-dom)
+  (hnreader--it-to-it (dom-by-class comment-dom "^commtext"))
+  ;; (hnreader--it-to-it comment-dom)
+  )
 
 (defun hnreader--get-reply (comment-dom)
   (dom-attr (dom-by-tag (dom-by-class comment-dom "^reply$") 'a) 'href))

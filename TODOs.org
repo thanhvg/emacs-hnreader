@@ -130,3 +130,8 @@ CLOSED: [2022-11-15 Tue 21:30]
 link can be hidden some where as text properties?
 
 just show the links, reply only shows for live discussion
+
+* hn html responses to browser and wget are different
+with browser the commtext span includes the reply while with wget they are sibling
+* inconsistent new lines
+the first paragraph is a span, next one is a p. So if comments has only one paragraph it will not be appended with a new line char
