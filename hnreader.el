@@ -5,7 +5,7 @@
 ;; Author: Thanh Vuong <thanhvg@gmail.com>
 ;; URL: https://github.com/thanhvg/emacs-hnreader/
 ;; Package-Requires: ((emacs "25.1") (promise "1.1") (request "0.3.0") (org "9.2"))
-;; Version: 0.2.4
+;; Version: 0.2.5
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@
 ;; when viewing comments
 
 ;;; Changelog
+;; 0.2.5 2022-11-16 handle all kinds of items
 ;; 0.2.4 2022-11-16 add reply link
 ;; 0.2.3 2022-11-14 add reply link
 ;; 0.2.2 2022-09-27 update css class grab for entry title
@@ -247,8 +248,17 @@ third one is 80.")
 
 (defun hnreader--get-title (dom)
   "Get title and link from DOM comment page."
-  (let ((a-link (dom-child-by-tag (dom-by-class dom "^titleline$") 'a)))
-    (cons (dom-text a-link) (dom-attr a-link 'href))))
+  ;; conventional case
+  (or (let ((a-link (dom-child-by-tag (dom-by-class dom "^titleline$") 'a)))
+        (if a-link
+            (cons (dom-text a-link) (dom-attr a-link 'href))
+          nil))
+      ;; item case
+      (let ((title (dom-attr (dom-by-id dom "pagespace") 'title))
+            (id (dom-attr (car (dom-by-class dom "athing")) 'id)))
+        (if title
+            (cons title (format "https://news.ycombinator.com/item?id=%s" id))
+          nil))))
 
 (defun hnreader--get-post-info (dom)
   "Get top info about the DOM comment page."
@@ -259,15 +269,28 @@ third one is 80.")
          (comment-count (last (dom-by-tag (dom-by-class fat-item "^subtext$") 'a)))
          (intro (if (= (length tr-tag) 6)
                     (nth 3 tr-tag)
-                  nil)))
+                  (hnreader--get-comment tr-tag))))
     ;; (setq thanh tr-tag)
     ;; (setq thanh-fat fat-item)
-    (cons
-     (format "%s | by %s | %s\n"
-             (dom-text score)
-             (dom-text user)
-             (dom-text comment-count))
-     intro)))
+    ;; conventional case
+    (or (and score
+             (cons
+              (format "%s | by %s | %s\n"
+                      (dom-text score)
+                      (dom-text user)
+                      (dom-text comment-count))
+              intro))
+        ;; item case
+        (let* ((a-links (dom-by-tag (dom-by-class dom "navs") 'a))
+               (parent-id (dom-attr (car a-links) 'href))
+               (context-id (dom-attr (nth 1 a-links) 'href)))
+          (and parent-id
+               (cons
+                (format "by %s | [[elisp:(hnreader-comment \"https://news.ycombinator.com/%s\")][parent]] | [[elisp:(hnreader-comment \"https://news.ycombinator.com/%s\")][context]]\n"
+                        (dom-text user)
+                        parent-id
+                        context-id)
+                intro))))))
 
 (defun hnreader--print-node (node)
   "Print the NODE with extra options."
@@ -341,11 +364,7 @@ a, img or pre. Otherwise copy"
 
 (defun hnreader--get-comment (comment-dom)
   "Get comment dom from COMMENT-DOM."
-  ;; (dom-by-class comment-dom "^commtext"))
-  ;; (setq thanh comment-dom)
-  (hnreader--it-to-it (dom-by-class comment-dom "^commtext"))
-  ;; (hnreader--it-to-it comment-dom)
-  )
+  (hnreader--it-to-it (dom-by-class comment-dom "^commtext")))
 
 (defun hnreader--get-reply (comment-dom)
   (dom-attr (dom-by-tag (dom-by-class comment-dom "^reply$") 'a) 'href))
