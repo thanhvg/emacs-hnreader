@@ -5,7 +5,7 @@
 ;; Author: Thanh Vuong <thanhvg@gmail.com>
 ;; URL: https://github.com/thanhvg/emacs-hnreader/
 ;; Package-Requires: ((emacs "25.1") (promise "1.1") (request "0.3.0") (org "9.2"))
-;; Version: 0.2.5
+;; Version: 0.2.6
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@
 ;; when viewing comments
 
 ;;; Changelog
+;; 0.2.6 2024-11-09 update css class capture
 ;; 0.2.5 2022-11-16 handle all kinds of items
 ;; 0.2.4 2022-11-16 add reply link
 ;; 0.2.3 2022-11-14 add reply link
@@ -227,7 +228,7 @@ third one is 80.")
 
 (defun hnreader--print-frontpage (dom buf url)
   "Print raw DOM and URL on BUF."
-  (let ((things (dom-by-class dom "^athing$"))
+  (let ((things (dom-by-class dom "^athing"))
         (subtexts (dom-by-class dom "^subtext$")))
     (with-current-buffer buf
       (read-only-mode -1)
