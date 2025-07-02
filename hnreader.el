@@ -5,7 +5,7 @@
 ;; Author: Thanh Vuong <thanhvg@gmail.com>
 ;; URL: https://github.com/thanhvg/emacs-hnreader/
 ;; Package-Requires: ((emacs "25.1") (promise "1.1") (request "0.3.0") (org "9.2"))
-;; Version: 0.2.6
+;; Version: 0.2.7
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@
 ;; when viewing comments
 
 ;;; Changelog
+;; 0.2.7 2025-07-01 update title capture for page and item
 ;; 0.2.6 2024-11-09 update css class capture
 ;; 0.2.5 2022-11-16 handle all kinds of items
 ;; 0.2.4 2022-11-16 add reply link
@@ -217,8 +218,7 @@ third one is 80.")
 
 (defun hnreader--get-route-top-info (dom)
   "Get top info of route like title, date of hn routes such as front, past from DOM."
-  (let* ((space-page (dom-by-id dom "^pagespace$"))
-         (title (dom-attr space-page 'title))
+  (let* ((title (dom-text (dom-by-tag dom 'title)))
          (hn-more (dom-by-class dom "^hnmore$")))
     (if hn-more
         (format "\n%s %s"
@@ -255,7 +255,7 @@ third one is 80.")
             (cons (dom-text a-link) (dom-attr a-link 'href))
           nil))
       ;; item case
-      (let ((title (dom-attr (dom-by-id dom "pagespace") 'title))
+      (let ((title (dom-text (dom-by-tag dom 'title)))
             (id (dom-attr (car (dom-by-class dom "athing")) 'id)))
         (if title
             (cons title (format "https://news.ycombinator.com/item?id=%s" id))
