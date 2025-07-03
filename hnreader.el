@@ -5,7 +5,7 @@
 ;; Author: Thanh Vuong <thanhvg@gmail.com>
 ;; URL: https://github.com/thanhvg/emacs-hnreader/
 ;; Package-Requires: ((emacs "25.1") (promise "1.1") (request "0.3.0") (org "9.2"))
-;; Version: 0.2.7
+;; Version: 0.2.8
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@
 ;; when viewing comments
 
 ;;; Changelog
+;; 0.2.8 2025-07-02 Show title in all pages
 ;; 0.2.7 2025-07-01 update title capture for page and item
 ;; 0.2.6 2024-11-09 update css class capture
 ;; 0.2.5 2022-11-16 handle all kinds of items
@@ -218,13 +219,10 @@ third one is 80.")
 
 (defun hnreader--get-route-top-info (dom)
   "Get top info of route like title, date of hn routes such as front, past from DOM."
-  (let* ((title (dom-text (dom-by-tag dom 'title)))
-         (hn-more (dom-by-class dom "^hnmore$")))
-    (if hn-more
-        (format "\n%s %s"
-                title
-                (hnreader--past-time-top-links hn-more))
-      (format "\n%s" title))))
+  (if-let* ((hn-more (dom-by-class dom "^hnmore$")))
+      (format "\n%s"
+              (hnreader--past-time-top-links hn-more))
+    "\n"))
 
 (defun hnreader--print-frontpage (dom buf url)
   "Print raw DOM and URL on BUF."
@@ -234,6 +232,7 @@ third one is 80.")
       (read-only-mode -1)
       (erase-buffer)
       (insert "#+STARTUP: overview indent\n")
+      (insert "#+TITLE: " (dom-text (dom-by-tag dom 'title)) "\n")
       (hnreader--print-header)
       (insert (hnreader--get-route-top-info dom))
       (cl-mapcar #'hnreader--print-frontpage-item things subtexts)
@@ -323,7 +322,7 @@ third one is 80.")
                         (hnreader--get-comment-owner comment)))
         ;; append an empty p node and let shr deal with new line consistency
         (hnreader--print-node (dom-append-child (hnreader--get-comment comment) '(p)))
-        (when-let (reply (hnreader--get-reply comment))
+        (when-let* ((reply (hnreader--get-reply comment)))
           (insert (format "[[https://news.ycombinator.com/%s][reply]]\n"
                           reply))))
       (when more-link
