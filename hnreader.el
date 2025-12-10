@@ -62,6 +62,11 @@
 (require 'dom)
 (require 'cl-lib)
 (require 'org)
+(require 'eww)
+
+;; Register eww: link type for org-mode
+(org-link-set-parameters "eww"
+                         :follow (lambda (url) (eww url)))
 
 ;; public variables
 (defgroup hnreader nil
