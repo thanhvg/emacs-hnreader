@@ -5,7 +5,7 @@
 ;; Author: Thanh Vuong <thanhvg@gmail.com>
 ;; URL: https://github.com/thanhvg/emacs-hnreader/
 ;; Package-Requires: ((emacs "25.1") (promise "1.1") (request "0.3.0") (org "9.2"))
-;; Version: 0.2.8
+;; Version: 0.2.9
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@
 ;; when viewing comments
 
 ;;; Changelog
+;; 0.2.9 2026-08-24 add user agent
 ;; 0.2.8 2025-07-02 Show title in all pages
 ;; 0.2.7 2025-07-01 update title capture for page and item
 ;; 0.2.6 2024-11-09 update css class capture
@@ -88,6 +89,9 @@
 (defvar hnreader--comment-buffer "*HNComments*"
   "Comment buffer.")
 
+(defvar hnreader--user-agent "emacs (hnreader.el)"
+  "User agent to avoid 429 error.")
+
 (defvar hnreader--indent 40
   "Tab value which is the width of an indent.
 top level commnet is 0 indent
@@ -125,16 +129,19 @@ third one is 80.")
   "Promise (url . dom) from URL with curl."
   (promise-new
    (lambda (resolve reject)
-     (request url
-       :parser (lambda ()
-                 (goto-char (point-min))
-                 (while (re-search-forward ">\\*" nil t)
-                   (replace-match ">-"))
-                 (libxml-parse-html-region (point-min) (point-max)))
-       :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
-                             (funcall reject  error-thrown)))
-       :success (cl-function (lambda (&key data &allow-other-keys)
-                               (funcall resolve data)))))))
+     (let
+         ((request-curl-options
+           `(,(format "-A \"%s\"" hnreader--user-agent))))
+       (request url
+         :parser (lambda ()
+                   (goto-char (point-min))
+                   (while (re-search-forward ">\\*" nil t)
+                     (replace-match ">-"))
+                   (libxml-parse-html-region (point-min) (point-max)))
+         :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
+                               (funcall reject  error-thrown)))
+         :success (cl-function (lambda (&key data &allow-other-keys)
+                                 (funcall resolve data))))))))
 
 (defun hnreader--prepare-buffer (buf &optional msg)
   "Print MSG message and prepare window for BUF buffer."
