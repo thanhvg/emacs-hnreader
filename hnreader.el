@@ -104,6 +104,15 @@ third one is 80.")
 (defvar hnreader--more-link nil
   "Load more link.")
 
+(define-derived-mode hnreader-mode
+  org-mode "HN Reader"
+  "Major mode for browsing Hackernews.")
+
+(defvar hnreader-mode-map
+  (let ((map (make-sparse-keymap)))
+    map)
+  "Keymap for `hnreader-mode'")
+
 ;;;###autoload
 (defun hnreader-back ()
   "Go back to previous location in history."
@@ -249,7 +258,7 @@ third one is 80.")
         (insert "\n* "))
       (insert (hnreader--get-morelink dom) " | ")
       (insert (format "[[elisp:(hnreader-read-page-back \"%s\")][Reload]]" url) )
-      (org-mode)
+      (hnreader-mode)
       (goto-char (point-min))
       (forward-line 2))))
 
@@ -336,7 +345,7 @@ third one is 80.")
         (insert "\n* " (format "[[elisp:(hnreader-comment \"%s\")][More]]" (concat "https://news.ycombinator.com/"
                                                                                    (dom-attr more-link 'href)))))
       (insert "\n* " (format  "[[elisp:(hnreader-comment \"%s\")][Reload]]" url))
-      (org-mode)
+      (hnreader-mode)
       ;; (org-shifttab 3)
       (goto-char (point-min))
       (forward-line 2))))
