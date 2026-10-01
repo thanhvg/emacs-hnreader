@@ -251,7 +251,8 @@ third one is 80.")
       (insert (format "[[elisp:(hnreader-read-page-back \"%s\")][Reload]]" url) )
       (org-mode)
       (goto-char (point-min))
-      (forward-line 2))))
+      (forward-line 2)
+      (read-only-mode 1))))
 
 (defun hnreader--get-title (dom)
   "Get title and link from DOM comment page."
@@ -339,7 +340,8 @@ third one is 80.")
       (org-mode)
       ;; (org-shifttab 3)
       (goto-char (point-min))
-      (forward-line 2))))
+      (forward-line 2)
+      (read-only-mode 1))))
 
 (defun hnreader--get-img-tag-width (comment-dom)
   "Get width attribute of img tag in COMMENT-DOM."
