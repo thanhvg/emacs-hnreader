@@ -354,7 +354,7 @@ third one is 80.")
 
 (defun hnreader--get-comment-owner (comment-dom)
   "Return user who wrote this COMMENT-DOM."
-  (dom-text (dom-by-class comment-dom "^hnuser$")))
+  (dom-text (dom-elements (dom-by-class comment-dom "^comhead$") 'href "user")))
 
 (defun hnreader--it-to-it (it)
   "Map node to node.
